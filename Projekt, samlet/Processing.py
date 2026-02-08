@@ -1,5 +1,3 @@
-# Upload image code: https://tutorial101.blogspot.com/2023/02/fastapi-upload-image.html
-
 import requests
 
 from PIL import Image
@@ -11,28 +9,37 @@ processor = AutoProcessor.from_pretrained("microsoft/kosmos-2-patch14-224")
 
 def process_image(image_path):
 
-    prompt = "<grounding>An image of"
+    prompt = "<grounding>An image of" # Tekst den skal starte med i responstekst. 
     
-    image = Image.open(image_path)
+    image = Image.open(image_path) # Åbn billede fra den givne url
 
-    # The original Kosmos-2 demo saves the image first then reload it. For some images, this will give slightly different image input and change the generation outputs.
-    image.save("new_image.jpg")
-    image = Image.open("new_image.jpg")
+    #Gem og genindlæs billedet, for at sikre korrekt type/format
+    image.save("new_image.jpg") 
+    image = Image.open("new_image.jpg") 
 
-    inputs = processor(text=prompt, images=image, return_tensors="pt")
+    
+    inputs = processor(text=prompt, images=image, return_tensors="pt") # Forbered input til AI-modellen dvs. tekst og billede.
+    # Processoren tager teksten, som laves om til token id'er
+    # Billedet laves om til pixelværdier
+    # Alt laves til sidst om til tensorer som modellen skal have som input
 
-    generated_ids = model.generate(
-        pixel_values=inputs["pixel_values"],
-        input_ids=inputs["input_ids"],
-        attention_mask=inputs["attention_mask"],
-        image_embeds=None,
-        image_embeds_position_mask=inputs["image_embeds_position_mask"],
-        use_cache=True,
-        max_new_tokens=128,
+
+    generated_ids = model.generate( #Modellens keys i dens dictionary(input) tildeles nogle værdier som anvendes til at generere tekst og labels
+        
+        pixel_values=inputs["pixel_values"], #Hver pixel får en værdi som modellen arbejder med 
+        input_ids=inputs["input_ids"], # Laver start-promptet om til tokens, så modellen ved hvad for noget tekst der skal genereres
+        attention_mask=inputs["attention_mask"], #Den filtrerer hvilke tokens der kan, og ikke kan bruges
+        image_embeds=None, #Billede-embedding anvendes ikke, og sættes derfor til none
+        image_embeds_position_mask=inputs["image_embeds_position_mask"], 
+        use_cache=True, #Gemmer beregninger for effektivitet
+        max_new_tokens=128, #Maksimal mængde af tokens, modellen må generere
     )
-    generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    
+    generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0] # Konverterer modellens output til tekst der kan læses
 
-    return generated_text
+    return generated_text #Returnerer responstekst og labels
+
+#print(inputs) = dictionary
 '''
 # Specify `cleanup_and_extract=False` in order to see the raw model generation.
 processed_text = processor.post_process_generation(generated_text, cleanup_and_extract=False)
