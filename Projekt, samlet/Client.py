@@ -5,82 +5,114 @@ from PIL import Image, ImageTk
 from Processing import process_image
 from LabelReturn import label_return
 
-# TEMPORARY CLIENT, anvendes til test
-def open_image():
-    filepath = filedialog.askopenfilename(
-        filetypes=[("Image files", "*.jpg *.png *.jpeg")]
-    )
+class ImageRecognitionGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Image Recognition")
+        self.root.geometry("900x500")
+        self.root.configure(bg="#d9d9d9")
 
-    if not filepath:
-        return
+        #Main frames
+        self.left_frame = tk.Frame(root, bg="#d9d9d9")
+        self.left_frame.grid(row=0, column=0, padx=20, pady=20, sticky="n")
 
-    # Vis billede
-    img = Image.open(filepath)
-    img.thumbnail((300, 300))
-    photo = ImageTk.PhotoImage(img)
+        self.right_frame = tk.Frame(root, bg="#d9d9d9")
+        self.right_frame.grid(row=0, column=1, padx=20, pady=20, sticky="n")
 
-    image_label.config(image=photo)
-    image_label.image = photo
+        #Image display
+        self.image_label = tk.Label(
+            self.left_frame,
+            text="[Billede]",
+            width=40,
+            height=20,
+            bg="white",
+            relief="solid"
+        )
+        self.image_label.pack(pady=10)
 
-    # Billedanalyse
-    generated_text = process_image(filepath)
+        #knap til at load image
+        self.load_button = tk.Button(
+            self.left_frame,
+            text="Vælg billede",
+            command=self.load_image
+        )
+        self.load_button.pack(pady=5)
 
-    # Behandler resultat
-    responsTekst, l1, l2, l3, l4 = label_return(generated_text)
+        #text respone
+        self.respone_label = tk.Label(
+            self.left_frame,
+            text="",
+            bg="#e6b3ff",
+            width=50,
+            height=3,
+            wraplength=350,
+            justify="left"
+        )
+        self.respone_label.pack(pady=15)
 
-    # Opdater GUI
-    response_label.config(text=responsTekst)
+        #labels og accuracy
+        self.label_boxes = []
 
-    label1.config(text=l1 or "")
-    label2.config(text=l2 or "")
-    label3.config(text=l3 or "")
-    label4.config(text=l4 or "")
+        for _ in range(4):
+            row_frame = tk.Frame(self.right_frame, bg="#d9d9d9")
+            row_frame.pack(pady=8)
 
+            label_box = tk.Label(
+                row_frame,
+                text="",
+                width=25,
+                height=2,
+                relief="solid",
+                bg="#c0e0e0"
+            )
+            label_box.pack(side="left", padx=5)
 
-# GUI
+            acc_box = tk.Label(
+                row_frame,
+                text="accuracy%",
+                width=12,
+                height=2,
+                relief="solid",
+                bg="#bfbfbf"
+            )
+            acc_box.pack(side="left", padx=5)
+            self.label_boxes.append((label_box, acc_box))
 
-root = tk.Tk()
-root.title("Image Recognition API Demo")
+    #image load funktion
+    def load_image(self):
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Image files", "*.jpg *.png *.jpeg")]
+        )
 
-# Venstre side
-left_frame = tk.Frame(root)
-left_frame.pack(side="left", padx=10, pady=10)
+        if not file_path:
+            return
 
-image_label = tk.Label(left_frame)
-image_label.pack()
+        #show image
+        image = Image.open(file_path)
+        image.thumbnail((300, 300))
+        photo = ImageTk.PhotoImage(image)
 
-response_label = tk.Label(
-    left_frame,
-    text="",
-    wraplength=300,
-    justify="left"
-)
-response_label.pack(pady=10)
+        self.image_label.configure(image=photo, text="")
+        self.image_label.image = photo
 
-# Højre side
-right_frame = tk.Frame(root)
-right_frame.pack(side="right", padx=10, pady=10)
+        #image processing
+        generated_text = process_image(file_path)
 
-tk.Label(right_frame, text="Genkendte labels:").pack(anchor="w")
+        #Behandling af resultat
+        response_text, l1, l2, l3, l4 = label_return(generated_text)
 
-label1 = tk.Label(right_frame)
-label1.pack(anchor="w")
+        #update respons
+        self.respone_label.config(text=response_text)
 
-label2 = tk.Label(right_frame)
-label2.pack(anchor="w")
+        labels = [l1, l2, l3, l4]
 
-label3 = tk.Label(right_frame)
-label3.pack(anchor="w")
+        #update labels
+        for i, (label_box, acc_box) in enumerate(self.label_boxes):
+            label_box.config(text=labels[i] or "")
+            acc_box.config(text="")  # Accuracy senere
 
-label4 = tk.Label(right_frame)
-label4.pack(anchor="w")
-
-# Knap
-btn = tk.Button(
-    root,
-    text="Vælg billede",
-    command=open_image
-)
-btn.pack(pady=10)
-
-root.mainloop()
+#run application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ImageRecognitionGUI(root)
+    root.mainloop()
