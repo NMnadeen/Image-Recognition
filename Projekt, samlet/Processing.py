@@ -9,7 +9,7 @@ from transformers import AutoProcessor, AutoModelForVision2Seq
 model = AutoModelForVision2Seq.from_pretrained("microsoft/kosmos-2-patch14-224")
 processor = AutoProcessor.from_pretrained("microsoft/kosmos-2-patch14-224")
 
-def proces_image(image_path):
+def process_image(image_path):
 
     prompt = "<grounding>An image of"
     
@@ -33,7 +33,6 @@ def proces_image(image_path):
     generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
     return generated_text
-
 '''
 # Specify `cleanup_and_extract=False` in order to see the raw model generation.
 processed_text = processor.post_process_generation(generated_text, cleanup_and_extract=False)
