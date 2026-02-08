@@ -21,3 +21,26 @@ def label_return(generated_text): #Returnerer labels og responstekst
     label4 = labels[3]
 
     return responsTekst, label1, label2, label3, label4
+
+# Pseudokode
+
+'''
+FUNKTION label_return(generated_text)
+
+    Udfør processering af responstekst og entities
+    
+    OPRET tom list labels
+    FOR entity i entities
+        Tilføj entities til listen labels
+
+    WHILE antallet af labels er mindre end 4
+        Tilføj ingen elementer til listen labels
+
+    Tildel
+    label 1 = labels[0]
+    label 2 = labels[1]
+    label 3 = labels[2]
+    label 4 = labels[3]
+
+    Returnér responstekst, label1, label2, label3 og label4 
+'''
