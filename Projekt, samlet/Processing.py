@@ -40,6 +40,17 @@ def process_image(image_path):
     return generated_text #Returnerer responstekst og labels
 
 #print(inputs) = dictionary
+
+
+# Prosakode til LabelReturn
+'''
+FUNKTION Process_image
+    Begyndelsesteksten bestemmes
+    Billede åbnes og genindlæses
+    Tekst og billede laves om til datatyper der er kompatible med modellen
+    Modellen behandler billedet og genererer beskrivende tekst 
+'''
+
 '''
 # Specify `cleanup_and_extract=False` in order to see the raw model generation.
 processed_text = processor.post_process_generation(generated_text, cleanup_and_extract=False)
